@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>InputSim</AssemblyName>
+    <RootNamespace>InputSim</RootNamespace>
+    <!-- 仅用于本地联调，不参与发布 -->
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+</Project>

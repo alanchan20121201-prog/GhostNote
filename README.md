@@ -21,6 +21,7 @@ GhostNote/
 ├─ .github/workflows/release.yml   # 打 tag 自动编译并发布 Release
 ├─ docs/RELEASE_NOTES_TEMPLATE.md  # Release 说明模板（被 workflow 读取）
 ├─ tools/make-icon.ps1             # 生成多尺寸应用图标（可选，ICO 已提交）
+├─ tools/InputSim/                 # 联调工具：模拟 Ctrl+Alt 拖动，用于回归测试
 └─ src/GhostNote/
    ├─ GhostNote.csproj             # 单文件发布 / 体积相关配置
    ├─ App.xaml(.cs)                # 无主窗口启动、事件编排、状态落盘
@@ -48,6 +49,22 @@ dotnet publish src/GhostNote/GhostNote.csproj -c Release -o publish
 ```
 
 产物：`publish/GhostNote.exe`。
+
+## 排查与联调
+
+**拖拽不工作怎么查**：以 `GHOSTNOTE_TRACE=1` 启动，会在 `%TEMP%\ghostnote-trace.log` 记录钩子安装结果、每次左键按下时的 Ctrl/Alt 状态、拖拽起点与位移。
+
+```bash
+GHOSTNOTE_TRACE=1 ./publish/GhostNote.exe
+```
+
+**回归测试**：`tools/InputSim` 会模拟「按住 Ctrl+Alt 左键拖动」，用于验证全局钩子链路（改动 `MouseHook` 后建议跑一次）。
+
+```bash
+dotnet run --project tools/InputSim -c Release -- 400 400 240 120
+```
+
+注意一点：全局低级鼠标钩子在回调里**绝不能吞掉 `WM_MOUSEMOVE`**（返回非零），否则光标会被冻结，表现为「按住拖动却拖不动」。这里只吞掉按下和抬起的那一对消息。
 
 ## 关于体积与裁剪（重要）
 

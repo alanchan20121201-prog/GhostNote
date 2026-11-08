@@ -4,6 +4,7 @@ using System.Windows.Interop;
 using System.Windows.Media;
 using GhostNote.Interop;
 using GhostNote.Models;
+using GhostNote.Services;
 
 namespace GhostNote.Views;
 
@@ -14,6 +15,7 @@ namespace GhostNote.Views;
 public partial class GhostWindow : Window
 {
     private bool _dragging;
+    private int _dragMoveCount;
     private double _dragStartLeft;
     private double _dragStartTop;
     private Point _dragStartCursor;   // 拖拽起点（DIP）
@@ -154,6 +156,7 @@ public partial class GhostWindow : Window
     {
         if (!IsVisible || string.IsNullOrEmpty(NoteText.Text))
         {
+            Trace.Log($"[drag] begin rejected visible={IsVisible} textLength={NoteText.Text?.Length}");
             return false;
         }
 
@@ -162,6 +165,9 @@ public partial class GhostWindow : Window
         _dragStartLeft = Left;
         _dragStartTop = Top;
         _dragging = true;
+        _dragMoveCount = 0;
+
+        Trace.Log($"[drag] begin left={Left:F1} top={Top:F1} cursor={cursor.X},{cursor.Y} dpi={dpi.DpiScaleX}");
         return true;
     }
 
@@ -178,6 +184,11 @@ public partial class GhostWindow : Window
 
         Left = _dragStartLeft + (current.X - _dragStartCursor.X);
         Top = _dragStartTop + (current.Y - _dragStartCursor.Y);
+
+        if (_dragMoveCount++ < 3)
+        {
+            Trace.Log($"[drag] move left={Left:F1} top={Top:F1}");
+        }
     }
 
     public void EndDrag()

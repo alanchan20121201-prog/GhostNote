@@ -48,6 +48,7 @@ public sealed class MouseHook : IDisposable
             NativeMethods.GetModuleHandle(null),
             0);
 
+        Trace.Log($"[hook] install handle={_hook} error={Marshal.GetLastWin32Error()}");
         return _hook != IntPtr.Zero;
     }
 
@@ -61,24 +62,23 @@ public sealed class MouseHook : IDisposable
 
             if (message == NativeMethods.WM_LBUTTONDOWN)
             {
-                // 只有 Ctrl + Alt 同时按住时才进入拖拽模式
-                if (NativeMethods.IsKeyDown(NativeMethods.VK_CONTROL) &&
-                    NativeMethods.IsKeyDown(NativeMethods.VK_MENU))
+                // 是否接管由上层决定（App 里判断修饰键与水印是否可见）
+                if (DragStart?.Invoke(point) == true)
                 {
-                    _dragging = DragStart?.Invoke(point) == true;
-                    if (_dragging)
-                    {
-                        // 吞掉这次点击，避免顺便点到底下的窗口/桌面图标
-                        return new IntPtr(1);
-                    }
+                    _dragging = true;
+                    Trace.Log($"[hook] dragstart ok pt={point.X},{point.Y}");
+
+                    // 吞掉这次点击，避免顺便点到底下的窗口/桌面图标
+                    return new IntPtr(1);
                 }
             }
             else if (message == NativeMethods.WM_MOUSEMOVE)
             {
+                // 绝对不能 return 1：吞掉移动消息会让光标原地冻结，
+                // 表现就是「按住拖动却拖不动」，只能挪动一两像素。
                 if (_dragging)
                 {
                     DragMove?.Invoke(point);
-                    return new IntPtr(1);
                 }
             }
             else if (message == NativeMethods.WM_LBUTTONUP)

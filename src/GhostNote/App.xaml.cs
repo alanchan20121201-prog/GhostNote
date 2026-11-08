@@ -1,4 +1,5 @@
 using System.Windows;
+using GhostNote.Interop;
 using GhostNote.Models;
 using GhostNote.Services;
 using GhostNote.Views;
@@ -148,7 +149,17 @@ public partial class App : Application
 
     private bool OnDragStart(System.Windows.Point cursor)
     {
-        return _ghost != null && _ghost.BeginDrag(cursor);
+        if (_ghost == null || !_ghost.IsVisible)
+        {
+            return false;
+        }
+
+        // 只有 Ctrl + Alt 同时按住才进入拖拽模式
+        var ctrl = NativeMethods.IsKeyDown(NativeMethods.VK_CONTROL);
+        var alt = NativeMethods.IsKeyDown(NativeMethods.VK_MENU);
+        Trace.Log($"[app] dragstart ctrl={ctrl} alt={alt}");
+
+        return ctrl && alt && _ghost.BeginDrag(cursor);
     }
 
     private void OnDragMove(System.Windows.Point cursor)
