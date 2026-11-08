@@ -1,0 +1,7 @@
+<Application x:Class="GhostNote.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             ShutdownMode="OnExplicitShutdown">
+    <!-- 没有主窗口，所有窗口都由 App.xaml.cs 按需创建 -->
+    <Application.Resources />
+</Application>

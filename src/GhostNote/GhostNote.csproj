@@ -1,0 +1,64 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <Nullable>enable</Nullable>
+    <!-- 关闭隐式 using：WPF 与 WinForms 同名类型（Application/MessageBox/Point 等）会冲突 -->
+    <ImplicitUsings>disable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <RootNamespace>GhostNote</RootNamespace>
+    <AssemblyName>GhostNote</AssemblyName>
+    <ApplicationIcon>Assets\GhostNote.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <Version>1.0.0</Version>
+    <Authors>GhostNote</Authors>
+    <Product>GhostNote 幽灵便签</Product>
+    <Description>把一句话像浮水印一样刻在桌面上，永远置顶、鼠标穿透。</Description>
+    <!--
+      WFAC010：WinForms 分析器建议不要在 manifest 里写 DPI 设置。
+      本项目是 WPF 主体（WinForms 只用来放托盘图标），WPF 的 PerMonitorV2 必须读 manifest，
+      所以这条提示在这里不适用，直接屏蔽。
+    -->
+    <NoWarn>$(NoWarn);WFAC010</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+  </PropertyGroup>
+
+  <!--
+    ===== 发布配置说明（很重要）=====
+
+    1) WPF 官方不支持 PublishTrimmed（裁剪）。
+       裁剪会把 XAML/BAML 的反射依赖剪掉，产物能编译成功，但双击运行会直接崩溃
+       （找不到类型 / MissingMethodException），而且这个问题无法通过配置绕过。
+
+    2) 因此这里采用「框架依赖 + 单文件」方案：
+       最终只有一个 GhostNote.exe（约 1MB 上下），远小于 5MB。
+       代价是用户机器需要安装 .NET 8 桌面运行时（Desktop Runtime），
+       Release 说明里已写好下载引导。
+
+    3) 如果你确实需要「用户零依赖」的自包含版本，请去掉 SelfContained=false，
+       体积会变成 60MB+，与 5MB 的硬性要求冲突，二者只能选一个。
+  -->
+  <PropertyGroup>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>false</SelfContained>
+    <PublishSingleFile>true</PublishSingleFile>
+    <!-- 压缩只在自包含时才允许（NETSDK1176），框架依赖模式下不设置 -->
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <PublishReadyToRun>false</PublishReadyToRun>
+    <PublishTrimmed>false</PublishTrimmed>
+    <!-- 只保留简体中文资源，去掉一堆语言附属程序集，进一步压体积 -->
+    <SatelliteResourceLanguages>zh-Hans</SatelliteResourceLanguages>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\GhostNote.ico" />
+  </ItemGroup>
+
+</Project>

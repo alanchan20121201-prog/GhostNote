@@ -1,0 +1,95 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: 编译并发布 Windows 单文件
+    runs-on: windows-latest
+
+    steps:
+      - name: 拉取代码
+        uses: actions/checkout@v4
+
+      - name: 安装 .NET 8 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: 还原依赖
+        run: dotnet restore src/GhostNote/GhostNote.csproj
+
+      - name: 单文件发布（框架依赖，产物约 1MB）
+        run: >
+          dotnet publish src/GhostNote/GhostNote.csproj
+          -c Release
+          -r win-x64
+          --self-contained false
+          -p:PublishSingleFile=true
+          -p:DebugType=none
+          -o publish
+
+      - name: 重命名产物
+        shell: pwsh
+        run: |
+          $tag = "${{ github.ref_name }}"
+          Copy-Item "publish/GhostNote.exe" "GhostNote-$tag-win-x64.exe"
+          Get-Item "GhostNote-$tag-win-x64.exe" | Select-Object Name, Length
+
+      - name: 体积门禁（必须小于 5MB）
+        shell: pwsh
+        run: |
+          $file = Get-Item "GhostNote-${{ github.ref_name }}-win-x64.exe"
+          $mb = [math]::Round($file.Length / 1MB, 2)
+          Write-Host "产物大小: $mb MB"
+          if ($file.Length -gt 5MB) {
+            throw "发布失败：产物 $mb MB，超过 5MB 上限"
+          }
+
+      - name: 组装 Release 说明（模板 + 附件信息）
+        shell: pwsh
+        run: |
+          $tag = "${{ github.ref_name }}"
+          $name = "GhostNote-$tag-win-x64.exe"
+          $hash = (Get-FileHash $name -Algorithm SHA256).Hash.ToLower()
+          $size = [math]::Round((Get-Item $name).Length / 1KB, 0)
+
+          $body = (Get-Content "docs/RELEASE_NOTES_TEMPLATE.md" -Raw -Encoding utf8).TrimEnd()
+          $footer = @(
+            ''
+            '---'
+            ''
+            '### 本次附件'
+            ''
+            '| 文件 | 大小 | SHA256 |'
+            '| --- | --- | --- |'
+            "| ``$name`` | $size KB | ``$hash`` |"
+            ''
+            '建议下载后核对校验值，确认文件没有被篡改。'
+            ''
+          ) -join "`n"
+
+          $body + "`n" + $footer | Out-File -FilePath release_body.md -Encoding utf8
+          Write-Host $hash
+
+      - name: 上传构建产物（保留 14 天，便于排查）
+        uses: actions/upload-artifact@v4
+        with:
+          name: GhostNote-${{ github.ref_name }}-win-x64
+          path: GhostNote-${{ github.ref_name }}-win-x64.exe
+          retention-days: 14
+
+      - name: 创建 GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: GhostNote ${{ github.ref_name }}
+          body_path: release_body.md
+          files: GhostNote-${{ github.ref_name }}-win-x64.exe
+          draft: false
+          prerelease: false

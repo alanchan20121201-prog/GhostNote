@@ -1,0 +1,53 @@
+<Window x:Class="GhostNote.Views.GhostWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="GhostNote"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        ResizeMode="NoResize"
+        ShowInTaskbar="False"
+        ShowActivated="False"
+        Topmost="True"
+        Focusable="False"
+        SizeToContent="WidthAndHeight"
+        WindowStartupLocation="Manual"
+        UseLayoutRounding="True">
+
+    <!--
+        水印本体：没有边框、没有标题栏、透明背景，只剩一行文字。
+        两层叠加：
+          1. OutlineText —— 深色文字 + 模糊，充当描边/光晕，保证白底上也看得清；
+          2. NoteText    —— 浅灰色正文 + 轻微投影，营造“刻在桌面上”的质感。
+        两层的文字、字号、换行宽度必须完全一致，否则会错位（由代码统一同步）。
+    -->
+    <Grid>
+
+        <TextBlock x:Name="OutlineText"
+                   FontFamily="Microsoft YaHei Light, Microsoft YaHei, Segoe UI Light, Segoe UI"
+                   FontWeight="Light"
+                   TextWrapping="Wrap"
+                   Margin="20"
+                   Foreground="#8C000000"
+                   IsHitTestVisible="False">
+            <TextBlock.Effect>
+                <BlurEffect Radius="6" />
+            </TextBlock.Effect>
+        </TextBlock>
+
+        <TextBlock x:Name="NoteText"
+                   FontFamily="Microsoft YaHei Light, Microsoft YaHei, Segoe UI Light, Segoe UI"
+                   FontWeight="Light"
+                   FontSize="36"
+                   Foreground="#B3E8E8E8"
+                   TextWrapping="Wrap"
+                   Margin="20"
+                   IsHitTestVisible="False">
+            <TextBlock.Effect>
+                <DropShadowEffect Color="Black" BlurRadius="16" ShadowDepth="2" Direction="315" Opacity="0.55" />
+            </TextBlock.Effect>
+        </TextBlock>
+
+    </Grid>
+
+</Window>
