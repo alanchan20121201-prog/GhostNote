@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Media;
 using GhostNote.Interop;
+using GhostNote.Localization;
 using GhostNote.Models;
 using GhostNote.Services;
 
@@ -84,6 +85,11 @@ public partial class GhostWindow : Window
         // 描边层必须和正文层用同样的字号与换行宽度，否则两层文字会错位
         NoteText.FontSize = fontSize;
         OutlineText.FontSize = fontSize;
+
+        // 日文/繁体各自用系统自带的字体，避免汉字被渲染成简体字形
+        var fontFamily = new FontFamily(Strings.WatermarkFont);
+        NoteText.FontFamily = fontFamily;
+        OutlineText.FontFamily = fontFamily;
 
         var brush = ParseBrush(state.Foreground);
         if (brush != null)

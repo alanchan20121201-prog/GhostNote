@@ -1,5 +1,6 @@
 using System.Windows;
 using GhostNote.Interop;
+using GhostNote.Localization;
 using GhostNote.Models;
 using GhostNote.Services;
 using GhostNote.Views;
@@ -52,7 +53,7 @@ public partial class App : Application
         }
         else
         {
-            _tray.Notify("快捷键被占用", "Ctrl+Alt+N 已被其它程序占用，请从托盘菜单打开输入框。");
+            _tray.Notify(Strings.HotkeyBusyTitle, Strings.HotkeyBusyBody);
         }
 
         // 5. 全局鼠标钩子：Ctrl+Alt+左键拖动水印

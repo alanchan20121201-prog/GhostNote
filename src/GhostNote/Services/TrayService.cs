@@ -1,6 +1,7 @@
 using System;
 using System.Drawing;
 using System.Windows.Forms;
+using GhostNote.Localization;
 
 namespace GhostNote.Services;
 
@@ -29,20 +30,20 @@ public sealed class TrayService : IDisposable
 
     public TrayService()
     {
-        var editItem = new ToolStripMenuItem("修改文字 (Ctrl+Alt+N)");
+        var editItem = new ToolStripMenuItem(Strings.MenuEdit);
         editItem.Click += (_, _) => EditRequested?.Invoke(this, EventArgs.Empty);
 
-        _fontSmall = CreateFontItem("小", SmallFont);
-        _fontMedium = CreateFontItem("中", MediumFont);
-        _fontLarge = CreateFontItem("大", LargeFont);
+        _fontSmall = CreateFontItem(Strings.FontSmall, SmallFont);
+        _fontMedium = CreateFontItem(Strings.FontMedium, MediumFont);
+        _fontLarge = CreateFontItem(Strings.FontLarge, LargeFont);
 
-        var fontMenu = new ToolStripMenuItem("字号");
+        var fontMenu = new ToolStripMenuItem(Strings.MenuFontSize);
         fontMenu.DropDownItems.AddRange(new ToolStripItem[] { _fontSmall, _fontMedium, _fontLarge });
 
-        _toggleItem = new ToolStripMenuItem("隐藏水印");
+        _toggleItem = new ToolStripMenuItem(Strings.MenuHide);
         _toggleItem.Click += (_, _) => ToggleRequested?.Invoke(this, EventArgs.Empty);
 
-        var exitItem = new ToolStripMenuItem("退出 GhostNote");
+        var exitItem = new ToolStripMenuItem(Strings.MenuExit);
         exitItem.Click += (_, _) => ExitRequested?.Invoke(this, EventArgs.Empty);
 
         var menu = new ContextMenuStrip
@@ -59,7 +60,7 @@ public sealed class TrayService : IDisposable
         _notifyIcon = new NotifyIcon
         {
             Icon = LoadAppIcon(),
-            Text = "GhostNote 幽灵便签",
+            Text = Strings.AppName,
             Visible = true,
             ContextMenuStrip = menu,
         };
@@ -70,7 +71,7 @@ public sealed class TrayService : IDisposable
     /// <summary>同步托盘菜单里“隐藏/显示”的文案。</summary>
     public void SetVisibleState(bool visible)
     {
-        _toggleItem.Text = visible ? "隐藏水印" : "显示水印";
+        _toggleItem.Text = visible ? Strings.MenuHide : Strings.MenuShow;
     }
 
     /// <summary>把当前字号对应的档位打上勾。</summary>

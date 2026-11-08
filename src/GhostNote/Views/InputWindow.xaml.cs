@@ -2,6 +2,8 @@ using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
+using GhostNote.Localization;
 
 namespace GhostNote.Views;
 
@@ -17,6 +19,9 @@ public partial class InputWindow : Window
     public InputWindow()
     {
         InitializeComponent();
+
+        // 按语言切换界面字体，日文/繁体才不会出现简体字形
+        FontFamily = new FontFamily(Strings.UiFont);
     }
 
     public void ShowForEdit(string? currentText)

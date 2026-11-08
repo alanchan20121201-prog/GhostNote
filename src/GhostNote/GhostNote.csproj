@@ -10,10 +10,9 @@
     <ImplicitUsings>disable</ImplicitUsings>
     <LangVersion>latest</LangVersion>
     <RootNamespace>GhostNote</RootNamespace>
-    <AssemblyName>GhostNote</AssemblyName>
     <ApplicationIcon>Assets\GhostNote.ico</ApplicationIcon>
     <ApplicationManifest>app.manifest</ApplicationManifest>
-    <Version>1.0.1</Version>
+    <Version>1.1.0</Version>
     <Authors>GhostNote</Authors>
     <Product>GhostNote 幽灵便签</Product>
     <Description>把一句话像浮水印一样刻在桌面上，永远置顶、鼠标穿透。</Description>
@@ -23,6 +22,31 @@
       所以这条提示在这里不适用，直接屏蔽。
     -->
     <NoWarn>$(NoWarn);WFAC010</NoWarn>
+  </PropertyGroup>
+
+  <!--
+    ===== 语言分支 =====
+    四种语言各自编译出一个独立 exe：
+      dotnet publish -p:GhostNoteLang=zh-cn   -> GhostNote-zh-cn.exe
+      dotnet publish -p:GhostNoteLang=zh-tw   -> GhostNote-zh-tw.exe
+      dotnet publish -p:GhostNoteLang=en      -> GhostNote-en.exe
+      dotnet publish -p:GhostNoteLang=ja      -> GhostNote-ja.exe
+    语言在编译期就固定下来，运行时不判断系统语言，也不需要附属程序集。
+  -->
+  <PropertyGroup>
+    <GhostNoteLang Condition="'$(GhostNoteLang)' == ''">zh-cn</GhostNoteLang>
+    <AssemblyName>GhostNote-$(GhostNoteLang)</AssemblyName>
+    <DefineConstants Condition="'$(GhostNoteLang)' == 'zh-tw'">$(DefineConstants);GHOSTNOTE_LANG_TW</DefineConstants>
+    <DefineConstants Condition="'$(GhostNoteLang)' == 'en'">$(DefineConstants);GHOSTNOTE_LANG_EN</DefineConstants>
+    <DefineConstants Condition="'$(GhostNoteLang)' == 'ja'">$(DefineConstants);GHOSTNOTE_LANG_JA</DefineConstants>
+
+    <!-- 文件属性里的产品名/说明也跟着语言走 -->
+    <Product Condition="'$(GhostNoteLang)' == 'zh-tw'">GhostNote 幽靈便籤</Product>
+    <Description Condition="'$(GhostNoteLang)' == 'zh-tw'">把一句話像浮水印一樣刻在桌面上，永遠置頂、滑鼠穿透。</Description>
+    <Product Condition="'$(GhostNoteLang)' == 'en'">GhostNote</Product>
+    <Description Condition="'$(GhostNoteLang)' == 'en'">Etch a line of text onto your desktop as a topmost, click-through watermark.</Description>
+    <Product Condition="'$(GhostNoteLang)' == 'ja'">GhostNote ゴーストメモ</Product>
+    <Description Condition="'$(GhostNoteLang)' == 'ja'">一言をデスクトップの透かしとして刻む、常に最前面・クリック透過のツール。</Description>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
